@@ -1,0 +1,21 @@
+select 
+cab.codemp,cab.codparc, cab.pendente,(SELECT (SELECT NOMETAB FROM TGFNTA WHERE CODTAB = (SELECT CODTAB FROM TGFTAB WHERE NUTAB = ITE.NUTAB)) 
+FROM TGFITE ITE
+WHERE
+ITE.NUNOTA = CAB.NUNOTA
+AND ITE.SEQUENCIA = (SELECT  MIN(SEQUENCIA) FROM TGFITE WHERE NUNOTA = CAB.NUNOTA)) AS Tabpreco,
+PAR.RAZAOSOCIAL, PAR.IDENTINSCESTAD,cab.dtmov, cab.nunota, cab.codtipoper,
+ite.codprod,ite.vlrtot,ite.vlrunit, ite.QTDCONFERIDA, pro.descrprod,ite.qtdneg, ITE.QTDENTREGUE, ite.qtdentregue-ite.qtdneg as Pendente, 
+(ite.qtdneg-ite.qtdentregue)*ite.vlrunit as Vlr_Pendente, cab.dtprevent 
+
+
+from tgfcab cab 
+inner join tgfite ite on ite.nunota = cab.nunota
+inner join tgfpar par on par.codparc = cab.codparc
+inner join tgfpro pro on pro.codprod = ite.codprod
+inner join tgftop tpO on cab.codtipoper = tPo.codtipoper and cab.codtipoper = 3100 and tPo.dhalter = (select max(dhalter) from tgftop where codtipoper = tPo.codtipoper) 
+where CAB.DTMOV BETWEEN :PERIODO.INI AND :PERIODO.FIN
+and (par.codparc = :CODPARC OR :CODPARC is NULL)
+and (ite.codprod = :CODPROD OR :CODPROD is NULL)
+and (cab.codemp = :CODEMP OR :CODEMP is NULL)
+and (cab.numpedido2= :NUNOTA OR :NUNOTA is NULL)
